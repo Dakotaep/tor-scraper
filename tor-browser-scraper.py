@@ -17,6 +17,24 @@ def compute_md5(file_name):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
+def removeEmptyFolders(path, removeRoot=True):
+  if not os.path.isdir(path):
+    return
+  # remove empty subfolders
+  files = os.listdir(path)
+  if len(files):
+    for f in files:
+      fullpath = os.path.join(path, f)
+      if os.path.isdir(fullpath):
+        removeEmptyFolders(fullpath)
+
+  # if folder empty, delete it
+  files = os.listdir(path)
+  if len(files) == 0 and removeRoot:
+    os.rmdir(path)
+
+
+
 url = 'https://archive.torproject.org/tor-package-archive/torbrowser/'
 reqs = requests.get(url)
 soup = BeautifulSoup(reqs.text, 'html.parser')
@@ -38,7 +56,7 @@ for u in urls:
     tor_version = tor_version and '.zip' not in tor_browser_version
 
     # Force version for testing
-    # tor_version = tor_version and '3.0b1' in tor_browser_version
+    tor_version = tor_version and '3.' in tor_browser_version
 
     if tor_version:
         print('Checking ' + tor_browser_version)
@@ -74,12 +92,16 @@ for u in urls:
                             if 'x32' in file_name:
                                 if key in version_tracker32:
                                     version_tracker32[key].append(tor_browser_version[0:len(tor_browser_version)-1])
+                                    # If key is already in tracker, then delete this file to avoid duplicates
+                                    os.remove(file_name)
                                 else:
                                     version_tracker32[key] = []
                                     version_tracker32[key].append(tor_browser_version[0:len(tor_browser_version)-1])
                             if 'x64' in file_name:
                                 if key in version_tracker64:
                                     version_tracker64[key].append(tor_browser_version[0:len(tor_browser_version)-1])
+                                    # If key is already in tracker, then delete this file to avoid duplicates
+                                    os.remove(file_name)
                                 else:
                                     version_tracker64[key] = []
                                     version_tracker64[key].append(tor_browser_version[0:len(tor_browser_version)-1])    
@@ -96,15 +118,22 @@ for u in urls:
                             if 'x32' in file_name:
                                 if key in version_tracker32:
                                     version_tracker32[key].append(tor_browser_version[0:len(tor_browser_version)-1])
+                                    # If key is already in tracker, then delete this file to avoid duplicates
+                                    os.remove(file_name)
                                 else:
                                     version_tracker32[key] = []
                                     version_tracker32[key].append(tor_browser_version[0:len(tor_browser_version)-1])
                             if 'x64' in file_name:
                                 if key in version_tracker64:
                                     version_tracker64[key].append(tor_browser_version[0:len(tor_browser_version)-1])
+                                    # If key is already in tracker, then delete this file to avoid duplicates
+                                    os.remove(file_name)
                                 else:
                                     version_tracker64[key] = []
                                     version_tracker64[key].append(tor_browser_version[0:len(tor_browser_version)-1])
+
+# Remove Empty Folder if any...
+removeEmptyFolders(os.path.dirname(os.path.realpath(__file__)), True)
 
 
 f = open("library_comparison.txt", "w")
