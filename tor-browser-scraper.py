@@ -33,21 +33,17 @@ def removeEmptyFolders(path, removeRoot=True):
   if len(files) == 0 and removeRoot:
     os.rmdir(path)
 
-
-
 url = 'https://archive.torproject.org/tor-package-archive/torbrowser/'
 reqs = requests.get(url)
 soup = BeautifulSoup(reqs.text, 'html.parser')
-
 urls = soup.find_all('a')
 
 # dictionary of key = md5, value = list of versions
-
 version_tracker32 = {}
 version_tracker64 = {}
+
 for u in urls:
     tor_browser_version = u.get('href')
-
     # Filter top level torbrowser versions
     tor_version = '.' in tor_browser_version and 'tor' not in tor_browser_version
     tor_version = tor_version and 'old' not in tor_browser_version 
@@ -55,8 +51,8 @@ for u in urls:
     tor_version = tor_version and '.asc' not in tor_browser_version 
     tor_version = tor_version and '.zip' not in tor_browser_version
 
-    # Force version for testing
-    tor_version = tor_version and '3.' in tor_browser_version
+    # Force version for testing if needed
+    # tor_version = tor_version and '3.' in tor_browser_version
 
     if tor_version:
         print('Checking ' + tor_browser_version)
@@ -134,8 +130,6 @@ for u in urls:
 
 # Remove Empty Folder if any...
 removeEmptyFolders(os.path.dirname(os.path.realpath(__file__)), True)
-
-
 f = open("library_comparison.txt", "w")
 f.write('Format\n')
 f.write('filename:hash | version1, version1.2, etc...\n')
